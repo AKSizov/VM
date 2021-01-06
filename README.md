@@ -1,4 +1,5 @@
 # GPU Passthrough Windows 10 Setup
+A handful of scripts that use qemu without libvirt to make a working Windows machine with GPU passthrough.
 This is my GPU accelerated windows 10 VM machine setup that I use for gaming.
 Tested on Arch Linux, but anything else should work too.
 ## Hardware
