@@ -36,8 +36,8 @@ if [ $# -eq 3 ]; then
 	z_SHIELD_COMMAND="cset shield --exec bash -- -c"
     fi
 fi
-VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,-vmx,+invtsc
-INVIS_FLAGS=+invtsc,-hypervisor,-vmx
+VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
+INVIS_FLAGS=-hypervisor
 HYPERV=$INVIS_FLAGS
 if [ $# -eq 4 ]; then
     echo "==> using $1 of ram..."
@@ -85,41 +85,46 @@ fi
 #echo "==> swapping on..."
 #sudo swapon -a
 #echo "==> attaching GPU..."
-#./gpu-attach.sh
+#sudo rmmod -f nvidia_drm
+#sudo rmmod -f nvidia_modeset
+#sudo rmmod -f nvidia
+#sudo rmmod -f i2c_nvidia_gpu
+#sudo modprobe vfio-pci
+sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override"
 echo "==> starting scream in 20 seconds (20ms)..."
 bash -c "sleep 20 && scream -i virbr0 -t 20" &
 #echo "==> starting client in 10 seconds..."
 #bash -c "sleep 10 && ./client.sh" &
 echo "==> start the monstrosity..."
-sudo $z_SHIELD_COMMAND "time nice --18 sudo chrt -i 0 qemu-system-x86_64 \
+sudo $z_SHIELD_COMMAND "time sudo chrt -rr 5 qemu-system-x86_64 \
 	-name win10,debug-threads=on \
 	-pidfile /run/qemu_ex.pid \
-	-pflash bios.bin \
+	-pflash OVMF-Custom.fd \
 	-m $RAM \
-	-cpu host,kvm=off,${HYPERV} \
-	-rtc base=localtime,clock=host,driftfix=none \
+	-cpu max,rdtscp=off,kvm=off,-vmx,${HYPERV} \
+	-rtc base=localtime,clock=host,driftfix=slew \
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 \
 	--enable-kvm \
 	-vga none \
-	--display none \
+	--display gtk \
+	-device ramfb \
 	-nodefaults \
 	-monitor stdio \
-	-boot c \
-	-machine type=q35,kernel_irqchip=on,accel=kvm \
+	-boot d \
+	-machine type=V_V,kernel_irqchip=on,accel=kvm \
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 \
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M \
 	-acpitable file=/tools/vm/patch.bin \
 	-device vfio-pci,host=01:00.0 \
+	-device vfio-pci,host=3d:00.0 \
 	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse \
 	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on \
 	-device virtio-keyboard-pci,id=input1,bus=pcie.0 \
 	-device virtio-mouse-pci,id=input0,bus=pcie.0 \
-	-net bridge,br=virbr0 -net nic,model=virtio \
-	-device vfio-pci,host=3d:00.0 \
-	-no-hpet \
 	-device ich9-intel-hda,bus=pcie.0,addr=0x1b \
 	-device hda-micro,audiodev=hda \
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native \
+	-net bridge,br=virbr0 -net nic,model=virtio \
 	-usb \
 	-device usb-host,hostbus=1,hostport=4"
 if [ "$SHIELD" == "true" ]; then
@@ -136,6 +141,15 @@ sudo ./freq-min.sh
 echo "==> shutdown complete!"
 
 ### random stuff i felt like i should leave just in case ###
+
+#-device ramfb
+#-cpu host,rdtscp=off,kvm=off,${HYPERV} \
+#-no-hpet \
+#rombar=0 ????
+
+#        -drive if=none,id=stick,file=/tools/vm/stick.img \
+#        -device nec-usb-xhci,id=xhci \
+#        -device usb-storage,bus=xhci.0,drive=stick \
 
 #-nodefaults
 
