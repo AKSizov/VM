@@ -76,25 +76,13 @@ echo "==> setting cpu freq to 5Ghz..."
 sudo ./freq-max.sh
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie
-#echo "==> swapping off..."
-#sudo swapoff -a
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
     sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
 fi
-#echo "==> swapping on..."
-#sudo swapon -a
-#echo "==> attaching GPU..."
-#sudo rmmod -f nvidia_drm
-#sudo rmmod -f nvidia_modeset
-#sudo rmmod -f nvidia
-#sudo rmmod -f i2c_nvidia_gpu
-#sudo modprobe vfio-pci
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override"
 echo "==> starting scream in 20 seconds (20ms)..."
 bash -c "sleep 20 && scream -i virbr0 -t 20" &
-#echo "==> starting client in 10 seconds..."
-#bash -c "sleep 10 && ./client.sh" &
 echo "==> start the monstrosity..."
 sudo $z_SHIELD_COMMAND "time sudo chrt -rr 5 qemu-system-x86_64 \
 	-name win10,debug-threads=on \
@@ -136,8 +124,6 @@ sudo rm -fv /dev/shm/looking-glass
 sudo systemctl stop libvirtd
 pkill scream
 sudo ./freq-min.sh
-#echo "==> detaching GPU..."
-#sudo ./gpu-detach.sh
 echo "==> shutdown complete!"
 
 ### random stuff i felt like i should leave just in case ###
