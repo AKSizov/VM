@@ -11,7 +11,8 @@ AMD might be supported, have not tested.
 3. Change `KVMKVMKVM\\0\\0\\0` in `target/i386/kvm.c` to your desired PC model
 4. Change `padstr` inside of `hw/ide/atapi.c`
 5. Change `bochs` `block/bochs.c`
-Credit to [This guide](https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_your_vm_undetectable_no_more/) for helping with the undetectable VM patches.
+
+Credit to [This guide](https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_your_vm_undetectable_no_more/) for helping with the QEMU patches
 ## Resources
 Undetectable VM: [https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_your_vm_undetectable_no_more/](https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_your_vm_undetectable_no_more/)
 
