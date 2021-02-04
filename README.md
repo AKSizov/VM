@@ -3,7 +3,6 @@ A handful of scripts that use qemu without libvirt to make a working Windows mac
 This is my GPU accelerated windows 10 VM machine setup that I use for gaming.
 Tested on Arch Linux, but anything else should work too.
 This setup should be undetectable, but KVM/QEMU at it's core is not designed to be.
-I'm using custom RDTSC patches to prevent forced VM exits, as detailed below.
 ## Hardware
 These scripts works fine on a muxless laptop with an RTX 2080 and an i9-9980HK.
 AMD might be supported, have not tested.
