@@ -37,7 +37,7 @@ if [ $# -eq 3 ]; then
     fi
 fi
 VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
-INVIS_FLAGS=-hypervisor
+INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=null,-hypervisor
 HYPERV=$INVIS_FLAGS
 if [ $# -eq 4 ]; then
     echo "==> using $1 of ram..."
@@ -67,6 +67,7 @@ z_CORES=$((CPUS / 2))
 echo "==> preparing..."
 echo "==> making looking glass..."
 sudo touch /dev/shm/looking-glass && sudo chown z:kvm /dev/shm/looking-glass && sudo chmod 660 /dev/shm/looking-glass
+echo "==> starting libvirtd..."
 sudo systemctl start libvirtd
 echo "==> attaching nvme..."
 sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind"
@@ -78,19 +79,26 @@ echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
-    sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
+    #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
+    sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override"
-echo "==> starting scream in 20 seconds (20ms)..."
-bash -c "sleep 20 && scream -i virbr0 -t 20" &
+echo "==> changing audio priority..."
+sudo chrt -p -a --rr 20 $(pidof pipewire-media-session)
+sudo chrt -p -a --rr 20 $(pidof pipewire)
+sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
+sudo chrt -p -a -rr 19 $(pidof python3)
+echo "==> starting scream in 60 seconds (20ms)..."
+bash -c "sleep 60 && scream -i virbr0 -t 20" &
 echo "==> start the monstrosity..."
-sudo $z_SHIELD_COMMAND "time sudo chrt -rr 5 qemu-system-x86_64 \
+sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-name win10,debug-threads=on \
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd \
 	-m $RAM \
-	-cpu max,rdtscp=off,kvm=off,-vmx,${HYPERV} \
-	-rtc base=localtime,clock=host,driftfix=slew \
+	-mem-path /dev/hugepages \
+	-cpu host,-vmx,${HYPERV} \
+	-rtc base=localtime,clock=host,driftfix=none \
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 \
 	--enable-kvm \
 	-vga none \
@@ -99,7 +107,7 @@ sudo $z_SHIELD_COMMAND "time sudo chrt -rr 5 qemu-system-x86_64 \
 	-nodefaults \
 	-monitor stdio \
 	-boot d \
-	-machine type=V_V,kernel_irqchip=on,accel=kvm \
+	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off \
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 \
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M \
 	-acpitable file=/tools/vm/patch.bin \
@@ -114,7 +122,8 @@ sudo $z_SHIELD_COMMAND "time sudo chrt -rr 5 qemu-system-x86_64 \
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native \
 	-net bridge,br=virbr0 -net nic,model=virtio \
 	-usb \
-	-device usb-host,hostbus=1,hostport=4"
+	-device usb-host,hostbus=1,hostport=4 | tee con.log"
+#-overcommit cpu-pm=on \
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
