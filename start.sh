@@ -79,6 +79,7 @@ echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
+    #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override"
@@ -91,37 +92,39 @@ echo "==> starting scream in 60 seconds (20ms)..."
 bash -c "sleep 60 && scream -i virbr0 -t 20" &
 echo "==> start the monstrosity..."
 sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
-	-name win10,debug-threads=on \
+	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
-	-pflash OVMF-Custom.fd \
-	-m $RAM \
-	-mem-path /dev/hugepages \
-	-cpu host,-vmx,${HYPERV} \
-	-rtc base=localtime,clock=host,driftfix=none \
-	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 \
-	--enable-kvm \
-	-vga none \
-	--display gtk \
-	-device ramfb \
-	-nodefaults \
-	-monitor stdio \
-	-boot d \
-	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off \
-	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 \
-	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M \
-	-acpitable file=/tools/vm/patch.bin \
-	-device vfio-pci,host=01:00.0 \
-	-device vfio-pci,host=3d:00.0 \
-	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse \
-	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on \
-	-device virtio-keyboard-pci,id=input1,bus=pcie.0 \
-	-device virtio-mouse-pci,id=input0,bus=pcie.0 \
-	-device ich9-intel-hda,bus=pcie.0,addr=0x1b \
-	-device hda-micro,audiodev=hda \
-	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native \
-	-net bridge,br=virbr0 -net nic,model=virtio \
+	-pflash OVMF-Custom.fd `# UEFI image`\
+	-m $RAM `# amount of ram is variable depending on args`\
+	-mem-path /dev/hugepages `# hugepages increase ram performance`\
+	-cpu host,-vmx,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
+	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
+	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
+	--enable-kvm `# so we can actually get some speed`\
+	-vga none `# using ramfb below`\
+	--display gtk `# display ramfb contents`\
+	-device ramfb `# very primitive display`\
+	-nodefaults `# don't create CD-ROM, or other "default" devices`\
+	-monitor stdio `# so we can have a monitor`\
+	-boot d `# boot from disk first`\
+	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
+	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
+	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M `# memory device for looking glass`\
+	-acpitable file=/tools/vm/patch.bin `# because i'm using RTX Max-Q, windows requires a battery`\
+	-device vfio-pci,host=01:00.0 `# my GPU`\
+	-device vfio-pci,host=3d:00.0 `# my NVME`\
+	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
+	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on `# keyboard passthrough via evdev`\
+	-device virtio-keyboard-pci,id=input1,bus=pcie.0 `# virtio device`\
+	-device virtio-mouse-pci,id=input0,bus=pcie.0 `# virtio device`\
+	-device ich9-intel-hda,bus=pcie.0,addr=0x1b `# audio input/output`\
+	-device hda-micro,audiodev=hda `# audio things`\
+	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
+	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
-	-device usb-host,hostbus=1,hostport=4 | tee con.log"
+	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights`\
+	-S `# start qemu in paused state so we can pin the threads`\
+	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
