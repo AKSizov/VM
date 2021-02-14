@@ -37,7 +37,7 @@ if [ $# -eq 3 ]; then
     fi
 fi
 VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
-INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=null,-hypervisor
+INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=18sm9219sb19,-hypervisor
 HYPERV=$INVIS_FLAGS
 if [ $# -eq 4 ]; then
     echo "==> using $1 of ram..."
@@ -101,6 +101,9 @@ sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
+	-mem-prealloc `# prealloc memory`\
+	-global ICH9-LPC.disable_s3=1 `# no idea`\
+	-global ICH9-LPC.disable_s4=1 `# no idea`\
 	-vga none `# using ramfb below`\
 	--display gtk `# display ramfb contents`\
 	-device ramfb `# very primitive display`\
@@ -111,7 +114,7 @@ sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M `# memory device for looking glass`\
 	-acpitable file=/tools/vm/patch.bin `# because i'm using RTX Max-Q, windows requires a battery`\
-	-device vfio-pci,host=01:00.0 `# my GPU`\
+	-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.rom `# my GPU`\
 	-device vfio-pci,host=3d:00.0 `# my NVME`\
 	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
 	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on `# keyboard passthrough via evdev`\
