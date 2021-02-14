@@ -107,7 +107,7 @@ sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
 	-boot d `# boot from disk first`\
-	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
+	-machine type=V_V,kernel_irqchip=on,accel=kvm `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M `# memory device for looking glass`\
 	-acpitable file=/tools/vm/patch.bin `# because i'm using RTX Max-Q, windows requires a battery`\
