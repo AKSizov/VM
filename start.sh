@@ -1,12 +1,13 @@
 cd /tools/vm/
-RAM=8G
-HOST_CPUS=16
-CPUS=12
-SHIELD=true
-z_SHIELD_COMMAND="cset shield --exec bash -- -c"
+RAM=10G # RAM dedicated for VM
+HOST_CPUS=16 # CPUS on host
+CPUS=12 # vCPUS for guest
+SHIELD=true # if we isolate these CPUS for the guest exclusively
+z_SHIELD_COMMAND="cset shield --exec bash -- -c" # default shielding
 if [[ $EUID -eq 0 ]]; then
-    echo "Do not run this with root!" 
-    exit 1
+    echo "Do not run this with root!"
+    exit 1 # in order to work with pulseaudio, do not run this script as root
+    # it will as for sudo password when starting qemu
 fi
 if [ $# -eq 0 ]; then
     echo "==> no arguments supplied! Starting with defaults..."
@@ -37,8 +38,10 @@ if [ $# -eq 3 ]; then
     fi
 fi
 VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
+# hyper-v enhancements ^
 INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=18sm9219sb19,-hypervisor
-HYPERV=$INVIS_FLAGS
+# invisible vm settings ^
+HYPERV=$INVIS_FLAGS # change default to whatever you'd like
 if [ $# -eq 4 ]; then
     echo "==> using $1 of ram..."
     echo "==> using $2 cpus..."
@@ -61,35 +64,39 @@ if [ $# -eq 4 ]; then
         HYPERV=$VIS_FLAGS
     fi
 fi
-z_FIRST_HOST_CPU=$((16 - CPUS))
-z_LAST_HOST_CPU=$((HOST_CPUS - 1))
-z_CORES=$((CPUS / 2))
+z_FIRST_HOST_CPU=$((16 - CPUS)) # see line below
+z_LAST_HOST_CPU=$((HOST_CPUS - 1)) # not being used right now, configure CPU pinning manually below
+z_CORES=$((CPUS / 2)) # ^
 echo "==> preparing..."
 echo "==> making looking glass..."
-sudo touch /dev/shm/looking-glass && sudo chown z:kvm /dev/shm/looking-glass && sudo chmod 660 /dev/shm/looking-glass
+sudo touch /dev/shm/looking-glass && sudo chown z:kvm /dev/shm/looking-glass && sudo chmod 660 /dev/shm/looking-glass # for looking-glass guest-host display. YOU MUST HAVE A DUMMY PLUG IF USING NVIDIA
 echo "==> starting libvirtd..."
-sudo systemctl start libvirtd
+sudo systemctl start libvirtd # for network only, I'll remove the libvirt dependency in the future
 echo "==> attaching nvme..."
-sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind"
-sudo bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override"
-sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind"
+sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach unused nvme
+sudo bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
+sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
 echo "==> setting cpu freq to 5Ghz..."
-sudo ./freq-max.sh
+sudo ./freq-max.sh # manually puts CPU at highest clock, not in repo
 echo "==> copying pulse cookie for root..."
-sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie
+sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
+    # configure CPU pinning manually!
+    # for intel CPUs with hyperthreading, the threads are not next to each other
+    # on a 16 cpu machine, cores 1 and 8 are on the same CPU and should be passed through to the guest as such
+    # configure the CPU pinning here, configure the exposed guest topology in the qemu command
     sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
-sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override"
-echo "==> changing audio priority..."
+sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
+echo "==> changing audio priority..." # remove this if there are errors or you are not using pipewire
 sudo chrt -p -a --rr 20 $(pidof pipewire-media-session)
 sudo chrt -p -a --rr 20 $(pidof pipewire)
 sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
 sudo chrt -p -a -rr 19 $(pidof python3)
 echo "==> starting scream in 60 seconds (20ms)..."
-bash -c "sleep 60 && scream -i virbr0 -t 20" &
+bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 echo "==> start the monstrosity..."
 sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
