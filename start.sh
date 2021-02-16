@@ -101,6 +101,7 @@ sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
+	-no-hpet `# no high precision event timer to fix stutters`\
 	-mem-prealloc `# prealloc memory`\
 	-global ICH9-LPC.disable_s3=1 `# no idea`\
 	-global ICH9-LPC.disable_s4=1 `# no idea`\
