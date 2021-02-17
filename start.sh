@@ -106,9 +106,9 @@ sudo sysctl vm.stat_interval=120
 sudo sysctl -w kernel.watchdog=0
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
-sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask"
-sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
-sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
+sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp have a negative impact on performance
+sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
 sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 echo "==> start the monstrosity..."
 sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
