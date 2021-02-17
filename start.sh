@@ -97,6 +97,19 @@ sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
 sudo chrt -p -a -rr 19 $(pidof python3)
 echo "==> starting scream in 60 seconds (20ms)..."
 bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+sudo bash -c "sync"
+echo "1" | sudo tee /proc/irq/*/smp_affinity
+sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
+sudo bash -c "echo 1 > /proc/sys/vm/compact_memory"
+sudo sysctl vm.nr_hugepages=10 # change hardcoded later
+sudo sysctl vm.stat_interval=120
+sudo sysctl -w kernel.watchdog=0
+# https://bitsum.com/tools/cpu-affinity-calculator/
+# 303 = CPUs 0,1,8,9
+sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask"
+sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 echo "==> start the monstrosity..."
 sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
