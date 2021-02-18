@@ -48,6 +48,19 @@ echo "  -> CPU thread 11 is $CPU_T_11"
 #echo "  -> CPU thread 13 is $CPU_T_13"
 #echo "  -> CPU thread 14 is $CPU_T_14"
 #echo "  -> CPU thread 15 is $CPU_T_15"
+echo "==> shielding processes..."
+sudo cset shield -s -p $CPU_T_0
+sudo cset shield -s -p $CPU_T_1
+sudo cset shield -s -p $CPU_T_2
+sudo cset shield -s -p $CPU_T_3
+sudo cset shield -s -p $CPU_T_4
+sudo cset shield -s -p $CPU_T_5
+sudo cset shield -s -p $CPU_T_6
+sudo cset shield -s -p $CPU_T_7
+sudo cset shield -s -p $CPU_T_8
+sudo cset shield -s -p $CPU_T_9
+sudo cset shield -s -p $CPU_T_10
+sudo cset shield -s -p $CPU_T_11
 echo "==> setting cpu affinities..."
 taskset -cp 2 $CPU_T_0
 taskset -cp 10 $CPU_T_1

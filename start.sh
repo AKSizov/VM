@@ -81,6 +81,34 @@ sudo ./freq-max.sh # manually puts CPU at highest clock
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
+    echo "==> taking CPUs offline..."
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu13/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu12/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu11/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu10/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu7/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu6/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu5/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu4/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu3/online"
+    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu2/online"
+    echo "==> waiting..."
+    sleep 2
+    echo "==> bringing CPUs online..."
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu15/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu14/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu13/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu12/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu11/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu10/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu7/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu6/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu5/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu4/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu3/online"
+    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online"
     echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
@@ -111,7 +139,8 @@ sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp ha
 sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
 sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 echo "==> start the monstrosity..."
-sudo $z_SHIELD_COMMAND "time sudo qemu-system-x86_64 \
+# sudo $z_SHIELD_COMMAND
+sudo bash -c "time sudo chrt -r 99 qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
