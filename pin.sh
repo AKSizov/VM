@@ -80,16 +80,16 @@ taskset -cp 15 $CPU_T_11
 #taskset -cp 7 $CPU_T_14
 #taskset -cp 15 $CPU_T_15
 echo "==> changing priorities..."
-chrt -p --rr 98 $CPU_T_0
-chrt -p --rr 98 $CPU_T_1
-chrt -p --rr 98 $CPU_T_2
-chrt -p --rr 98 $CPU_T_3
-chrt -p --rr 98 $CPU_T_4
-chrt -p --rr 98 $CPU_T_5
-chrt -p --rr 98 $CPU_T_6
-chrt -p --rr 98 $CPU_T_7
-chrt -p --rr 98 $CPU_T_8
-chrt -p --rr 98 $CPU_T_9
-chrt -p --rr 98 $CPU_T_10
-chrt -p --rr 98 $CPU_T_11
+chrt -p --rr 99 $CPU_T_0
+chrt -p --rr 99 $CPU_T_1
+chrt -p --rr 99 $CPU_T_2
+chrt -p --rr 99 $CPU_T_3
+chrt -p --rr 99 $CPU_T_4
+chrt -p --rr 99 $CPU_T_5
+chrt -p --rr 99 $CPU_T_6
+chrt -p --rr 99 $CPU_T_7
+chrt -p --rr 99 $CPU_T_8
+chrt -p --rr 99 $CPU_T_9
+chrt -p --rr 99 $CPU_T_10
+chrt -p --rr 99 $CPU_T_11
 echo "==> done!"
