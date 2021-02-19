@@ -140,7 +140,7 @@ sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scalin
 sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
-sudo bash -c "time sudo chrt -r 99 qemu-system-x86_64 \
+sudo bash -c "time sudo qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
