@@ -1,4 +1,5 @@
 #!/bin/bash
+# you must type info cpus in QEMU monitor for any of this to work
 CPU_T_0=$(cat con.log | grep "CPU #0:" | cut -c 21-)
 CPU_T_1=$(cat con.log | grep "CPU #1:" | cut -c 21-)
 CPU_T_2=$(cat con.log | grep "CPU #2:" | cut -c 21-)
