@@ -109,7 +109,7 @@ if [ "$SHIELD" == "true" ]; then
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu4/online"
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu3/online"
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online"
-    echo "==> setting cpushield on cpus ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}..."
+    echo "==> setting cpushield on configured cpus..."
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
