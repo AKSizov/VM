@@ -129,8 +129,8 @@ sudo bash -c "sync"
 echo "1" | sudo tee /proc/irq/*/smp_affinity
 sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
 sudo bash -c "echo 1 > /proc/sys/vm/compact_memory"
-sudo sysctl vm.nr_hugepages=10 # change hardcoded later
-sudo sysctl vm.stat_interval=120
+#sudo sysctl vm.nr_hugepages=10 # change hardcoded later
+#sudo sysctl vm.stat_interval=120
 sudo sysctl -w kernel.watchdog=0
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
