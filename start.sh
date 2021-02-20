@@ -118,26 +118,26 @@ if [ "$SHIELD" == "true" ]; then
     sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
-echo "==> changing audio priority..." # remove this if there are errors or you are not using pipewire
-sudo chrt -p -a --rr 20 $(pidof pipewire-media-session)
-sudo chrt -p -a --rr 20 $(pidof pipewire)
-sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
-sudo chrt -p -a -rr 19 $(pidof python3)
+#echo "==> changing audio priority..." # remove this if there are errors or you are not using pipewire
+#sudo chrt -p -a --rr 20 $(pidof pipewire-media-session)
+#sudo chrt -p -a --rr 20 $(pidof pipewire)
+#sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
+#sudo chrt -p -a -rr 19 $(pidof python3)
 echo "==> starting scream in 60 seconds (20ms)..."
-bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
-sudo bash -c "sync"
-echo "1" | sudo tee /proc/irq/*/smp_affinity
-sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
-sudo bash -c "echo 1 > /proc/sys/vm/compact_memory"
+#bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+#sudo bash -c "sync"
+#echo "1" | sudo tee /proc/irq/*/smp_affinity
+#sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
+#sudo bash -c "echo 1 > /proc/sys/vm/compact_memory"
 #sudo sysctl vm.nr_hugepages=10 # change hardcoded later
 #sudo sysctl vm.stat_interval=120
-sudo sysctl -w kernel.watchdog=0
+#sudo sysctl -w kernel.watchdog=0
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
-sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
-sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp have a negative impact on performance
-sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
-sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
+#sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
+#sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp have a negative impact on performance
+#sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
+#sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo qemu-system-x86_64 \
