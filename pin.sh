@@ -63,33 +63,33 @@ sudo cset shield -s -p $CPU_T_9
 sudo cset shield -s -p $CPU_T_10
 sudo cset shield -s -p $CPU_T_11
 echo "==> setting cpu affinities..."
-taskset -cp 2 $CPU_T_0
-taskset -cp 10 $CPU_T_1
-taskset -cp 3 $CPU_T_2
-taskset -cp 11 $CPU_T_3
-taskset -cp 4 $CPU_T_4
-taskset -cp 12 $CPU_T_5
-taskset -cp 5 $CPU_T_6
-taskset -cp 13 $CPU_T_7
-taskset -cp 6 $CPU_T_8
-taskset -cp 14 $CPU_T_9
-taskset -cp 7 $CPU_T_10
-taskset -cp 15 $CPU_T_11
+sudo taskset -cp 2 $CPU_T_0
+sudo taskset -cp 10 $CPU_T_1
+sudo taskset -cp 3 $CPU_T_2
+sudo taskset -cp 11 $CPU_T_3
+sudo taskset -cp 4 $CPU_T_4
+sudo taskset -cp 12 $CPU_T_5
+sudo taskset -cp 5 $CPU_T_6
+sudo taskset -cp 13 $CPU_T_7
+sudo taskset -cp 6 $CPU_T_8
+sudo taskset -cp 14 $CPU_T_9
+sudo taskset -cp 7 $CPU_T_10
+sudo taskset -cp 15 $CPU_T_11
 #taskset -cp 6 $CPU_T_12
 #taskset -cp 14 $CPU_T_13
 #taskset -cp 7 $CPU_T_14
 #taskset -cp 15 $CPU_T_15
 echo "==> changing priorities..."
-chrt -p --rr 99 $CPU_T_0
-chrt -p --rr 99 $CPU_T_1
-chrt -p --rr 99 $CPU_T_2
-chrt -p --rr 99 $CPU_T_3
-chrt -p --rr 99 $CPU_T_4
-chrt -p --rr 99 $CPU_T_5
-chrt -p --rr 99 $CPU_T_6
-chrt -p --rr 99 $CPU_T_7
-chrt -p --rr 99 $CPU_T_8
-chrt -p --rr 99 $CPU_T_9
-chrt -p --rr 99 $CPU_T_10
-chrt -p --rr 99 $CPU_T_11
+sudo chrt -p -r 99 $CPU_T_0
+sudo chrt -p -r 99 $CPU_T_1
+sudo chrt -p -r 99 $CPU_T_2
+sudo chrt -p -r 99 $CPU_T_3
+sudo chrt -p -r 99 $CPU_T_4
+sudo chrt -p -r 99 $CPU_T_5
+sudo chrt -p -r 99 $CPU_T_6
+sudo chrt -p -r 99 $CPU_T_7
+sudo chrt -p -r 99 $CPU_T_8
+sudo chrt -p -r 99 $CPU_T_9
+sudo chrt -p -r 99 $CPU_T_10
+sudo chrt -p -r 99 $CPU_T_11
 echo "==> done!"
