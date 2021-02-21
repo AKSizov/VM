@@ -81,6 +81,7 @@ sudo ./freq-max.sh # manually puts CPU at highest clock
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
+    echo "NYI!"
     echo "==> taking CPUs offline..."
     sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online"
     sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online"
@@ -109,7 +110,7 @@ if [ "$SHIELD" == "true" ]; then
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu4/online"
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu3/online"
     sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online"
-    echo "==> setting cpushield on configured cpus..."
+    #echo "==> setting cpushield on configured cpus..."
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
@@ -123,7 +124,7 @@ sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_overri
 #sudo chrt -p -a --rr 20 $(pidof pipewire)
 #sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
 #sudo chrt -p -a -rr 19 $(pidof python3)
-echo "==> starting scream in 60 seconds (20ms)..."
+#echo "==> starting scream in 60 seconds (20ms)..."
 #bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 #sudo bash -c "sync"
 #echo "1" | sudo tee /proc/irq/*/smp_affinity
@@ -134,10 +135,11 @@ echo "==> starting scream in 60 seconds (20ms)..."
 #sudo sysctl -w kernel.watchdog=0
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
-#sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
+sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
 #sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp have a negative impact on performance
 #sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
 #sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
+#sudo bash -c "echo af5972fb-5530-41a7-0000-fd836204445f > /sys/devices/pci0000:00/0000:00:02.0/mdev_supported_types/i915-GVTg_V5_4/create"
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo qemu-system-x86_64 \
@@ -155,12 +157,12 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-global ICH9-LPC.disable_s3=1 `# no idea`\
 	-global ICH9-LPC.disable_s4=1 `# no idea`\
 	-vga none `# using ramfb below`\
+	-device ramfb `# primitive display`\
 	--display gtk `# display ramfb contents`\
-	-device ramfb `# very primitive display`\
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
 	-boot d `# boot from disk first`\
-	-machine type=V_V,kernel_irqchip=on,accel=kvm `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
+	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M `# memory device for looking glass`\
 	-acpitable file=/tools/vm/patch.bin `# because i'm using RTX Max-Q, windows requires a battery`\
@@ -179,6 +181,8 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
+#-device vfio-pci,sysfsdev=/sys/bus/mdev/devices/af5972fb-5530-41a7-0000-fd836204445f,display=on,x-igd-opregion=on,xres=1920,yres=1080,ramfb=on,driver=vfio-pci-nohotplug \
+#sudo bash -c "echo 1 > /sys/bus/pci/devices/0000:00:02.0/af5972fb-5530-41a7-0000-fd836204445f/remove"
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
