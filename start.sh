@@ -140,6 +140,9 @@ sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bit
 #sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
 #sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
 #sudo bash -c "echo af5972fb-5530-41a7-0000-fd836204445f > /sys/devices/pci0000:00/0000:00:02.0/mdev_supported_types/i915-GVTg_V5_4/create"
+echo "==> shutting down picom..."
+pkill picom # <= this little shit was the cause of all of my problems.
+# keep this here if you experience lag in the guest when doing literally anything in the host
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo qemu-system-x86_64 \
@@ -183,6 +186,7 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 #-overcommit cpu-pm=on \
 #-device vfio-pci,sysfsdev=/sys/bus/mdev/devices/af5972fb-5530-41a7-0000-fd836204445f,display=on,x-igd-opregion=on,xres=1920,yres=1080,ramfb=on,driver=vfio-pci-nohotplug \
 #sudo bash -c "echo 1 > /sys/bus/pci/devices/0000:00:02.0/af5972fb-5530-41a7-0000-fd836204445f/remove"
+picom -b
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
