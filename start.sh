@@ -165,7 +165,7 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
 	-boot d `# boot from disk first`\
-	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, don't remember what smm does`\
+	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, smm=off doesn't exit when some cpu call happens`\
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
 	-object memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=32M `# memory device for looking glass`\
 	-acpitable file=/tools/vm/patch.bin `# because i'm using RTX Max-Q, windows requires a battery`\
@@ -180,7 +180,7 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
-	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights`\
+	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
