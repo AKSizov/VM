@@ -97,20 +97,9 @@ sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_overri
 #sudo chrt -p -a -rr 19 $(pidof python3)
 #echo "==> starting scream in 60 seconds (20ms)..."
 #bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
-#sudo bash -c "sync"
-#echo "1" | sudo tee /proc/irq/*/smp_affinity
-#sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
-#sudo bash -c "echo 1 > /proc/sys/vm/compact_memory"
-#sudo sysctl vm.nr_hugepages=10 # change hardcoded later
-#sudo sysctl vm.stat_interval=120
-#sudo sysctl -w kernel.watchdog=0
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
-#sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled" # thp have a negative impact on performance
-#sudo bash -c "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor" # change cstates
-#sudo bash -c "echo 0 > /sys/bus/workqueue/devices/writeback/numa"
-#sudo bash -c "echo af5972fb-5530-41a7-0000-fd836204445f > /sys/devices/pci0000:00/0000:00:02.0/mdev_supported_types/i915-GVTg_V5_4/create"
 echo "==> shutting down picom..."
 pkill picom # <= this little shit was the cause of all of my problems.
 # keep this here if you experience lag in the guest when doing literally anything in the host
@@ -155,8 +144,6 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
-#-device vfio-pci,sysfsdev=/sys/bus/mdev/devices/af5972fb-5530-41a7-0000-fd836204445f,display=on,x-igd-opregion=on,xres=1920,yres=1080,ramfb=on,driver=vfio-pci-nohotplug \
-#sudo bash -c "echo 1 > /sys/bus/pci/devices/0000:00:02.0/af5972fb-5530-41a7-0000-fd836204445f/remove"
 picom -b
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
