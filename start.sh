@@ -1,5 +1,5 @@
 cd /tools/vm/
-RAM=10G # RAM dedicated for VM
+RAM=8G # RAM dedicated for VM
 HOST_CPUS=16 # CPUS on host
 CPUS=12 # vCPUS for guest
 SHIELD=true # if we isolate these CPUS for the guest exclusively
@@ -81,36 +81,7 @@ sudo ./freq-max.sh # manually puts CPU at highest clock
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
-    echo "NYI!"
-    echo "==> taking CPUs offline..."
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu13/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu12/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu11/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu10/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu7/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu6/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu5/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu4/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu3/online"
-    sudo bash -c "echo 0 | sudo tee /sys/devices/system/cpu/cpu2/online"
-    echo "==> waiting..."
-    sleep 2
-    echo "==> bringing CPUs online..."
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu15/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu14/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu13/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu12/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu11/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu10/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu7/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu6/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu5/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu4/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu3/online"
-    sudo bash -c "echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online"
-    #echo "==> setting cpushield on configured cpus..."
+    echo "==> setting cpushield on configured cpus..."
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
