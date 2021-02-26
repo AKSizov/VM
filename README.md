@@ -16,7 +16,7 @@ AMD might be supported, have not tested.
 6. Follow the instructions for [WCharacter/RDTSC-KVM-Handler](https://github.com/WCharacter/RDTSC-KVM-Handler)
 7. Change your boot commandline to include the following if you are using intel: 
 ```
-intel_iommu=on iommu=pt vfio-pci.ids=<device ids> nmi_watchdod=0 i915.enable_psr=0 i915.enable_fbc=0 i915.enable_dc=0 disable_power_well=1 default_hugepagesz=1G hugepagesz=1G hugepages=<ram in gb> irqaffinity=<non_guest_cpus> isolcpus=<guest_cpus> nohz_full=<guest_cpus> rcu_nocbs=<guest_cpus> cpuidle.off=1
+intel_iommu=on iommu=pt vfio-pci.ids=<device ids> nmi_watchdod=0 default_hugepagesz=1G hugepagesz=1G hugepages=<ram in gb> irqaffinity=<non_guest_cpus> isolcpus=<guest_cpus> nohz_full=<guest_cpus> rcu_nocbs=<guest_cpus> cpuidle.off=1
 ```
 Credit to [This guide](https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_your_vm_undetectable_no_more/) for helping with the QEMU patches
 ## FAQ
