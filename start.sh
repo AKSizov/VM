@@ -77,7 +77,7 @@ sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach 
 sudo bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
 sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
 echo "==> setting cpu freq to 5Ghz..."
-sudo ./freq-max.sh # manually puts CPU at highest clock
+#sudo ./freq-max.sh # manually puts CPU at highest clock
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
@@ -126,6 +126,8 @@ if [ "$SHIELD" == "true" ]; then
     echo 1 | sudo tee /sys/devices/system/cpu/cpu5/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu6/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu7/online
+    echo 1 | sudo tee /sys/devices/system/cpu/cpu8/online
+    echo 1 | sudo tee /sys/devices/system/cpu/cpu9/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu10/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu11/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu12/online
@@ -178,13 +180,14 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-cpu host,-vmx,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
+	-overcommit cpu-pm=on `# allow guest to control cpu states`\
 	--enable-kvm `# so we can actually get some speed`\
 	-mem-prealloc `# prealloc memory`\
 	-global ICH9-LPC.disable_s3=1 `# no idea`\
 	-global ICH9-LPC.disable_s4=1 `# no idea`\
 	-vga none `# using ramfb below`\
-	-device ramfb `# primitive display`\
-	--display gtk `# display ramfb contents`\
+	`#-device ramfb ``# primitive display`\
+	--display none `# display ramfb contents`\
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
 	-boot d `# boot from disk first`\
