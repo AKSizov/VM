@@ -39,7 +39,7 @@ if [ $# -eq 3 ]; then
 fi
 VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
 # hyper-v enhancements ^
-INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=18sm9219sb19,-hypervisor
+INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=null,-hypervisor
 # invisible vm settings ^
 HYPERV=$INVIS_FLAGS # change default to whatever you'd like
 if [ $# -eq 4 ]; then
@@ -146,6 +146,10 @@ if [ "$SHIELD" == "true" ]; then
     sudo cat /sys/devices/system/cpu/cpu13/online
     sudo cat /sys/devices/system/cpu/cpu14/online
     sudo cat /sys/devices/system/cpu/cpu15/online
+    sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
+    sudo tuna --cpus=2-7 --isolate
+    sudo tuna --cpus=10-15 --isolate
+    sudo find /sys/devices/virtual/workqueue -name cpumask  -exec sh -c 'echo 1 > {}' ';'
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
@@ -159,8 +163,8 @@ sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_overri
 #sudo chrt -p -a --rr 20 $(pidof pipewire)
 #sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
 #sudo chrt -p -a -rr 19 $(pidof python3)
-#echo "==> starting scream in 60 seconds (20ms)..."
-#bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+echo "==> starting scream in 60 seconds (20ms)..."
+bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
