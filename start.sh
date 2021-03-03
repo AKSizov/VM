@@ -168,7 +168,7 @@ echo "==> shutting down picom..."
 pkill picom # <= this little shit was the cause of all of my problems.
 # keep this here if you experience lag in the guest when doing literally anything in the host
 echo "==> setting cpu freq"
-./freq-max.sh
+sudo ./freq-max.sh
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo qemu-system-x86_64 \
