@@ -76,8 +76,6 @@ echo "==> attaching nvme..."
 sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach unused nvme
 sudo bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
 sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
-echo "==> setting cpu freq to 5Ghz..."
-#sudo ./freq-max.sh # manually puts CPU at highest clock
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
@@ -169,6 +167,8 @@ sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bit
 echo "==> shutting down picom..."
 pkill picom # <= this little shit was the cause of all of my problems.
 # keep this here if you experience lag in the guest when doing literally anything in the host
+echo "==> setting cpu freq"
+./freq-max.sh
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo qemu-system-x86_64 \
@@ -180,7 +180,6 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	-cpu host,-vmx,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
-	-overcommit cpu-pm=on `# allow guest to control cpu states`\
 	--enable-kvm `# so we can actually get some speed`\
 	-mem-prealloc `# prealloc memory`\
 	-global ICH9-LPC.disable_s3=1 `# no idea`\
