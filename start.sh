@@ -102,20 +102,6 @@ if [ "$SHIELD" == "true" ]; then
     echo 0 | sudo tee /sys/devices/system/cpu/cpu13/online
     echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online
     echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online
-    echo "CPU STATUS"
-    sudo cat /sys/devices/system/cpu/cpu1/online
-    sudo cat /sys/devices/system/cpu/cpu2/online
-    sudo cat /sys/devices/system/cpu/cpu3/online
-    sudo cat /sys/devices/system/cpu/cpu4/online
-    sudo cat /sys/devices/system/cpu/cpu5/online
-    sudo cat /sys/devices/system/cpu/cpu6/online
-    sudo cat /sys/devices/system/cpu/cpu7/online
-    sudo cat /sys/devices/system/cpu/cpu10/online
-    sudo cat /sys/devices/system/cpu/cpu11/online
-    sudo cat /sys/devices/system/cpu/cpu12/online
-    sudo cat /sys/devices/system/cpu/cpu13/online
-    sudo cat /sys/devices/system/cpu/cpu14/online
-    sudo cat /sys/devices/system/cpu/cpu15/online
     sleep 5
     echo 1 | sudo tee /sys/devices/system/cpu/cpu1/online
     echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online
