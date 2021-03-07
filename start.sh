@@ -37,7 +37,7 @@ if [ $# -eq 3 ]; then
 	z_SHIELD_COMMAND="cset shield --exec bash -- -c"
     fi
 fi
-VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough,+invtsc
+VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough
 # hyper-v enhancements ^
 INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=null,-hypervisor
 # invisible vm settings ^
