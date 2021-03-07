@@ -140,14 +140,17 @@ bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use i
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
-echo "==> shutting down picom..."
-pkill picom # <= this little shit was the cause of all of my problems.
+#echo "==> shutting down picom..."
+#pkill picom # <= this little shit was the cause of all of my problems.
 # keep this here if you experience lag in the guest when doing literally anything in the host
 echo "==> setting cpu freq..."
 sudo ./freq-max.sh
 echo "==> changing rt settings..."
 echo -1 | sudo tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95% (realtime tasks are throttled to 95% to prevent system lock-ups)
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
+echo 2 | sudo tee /proc/sys/kernel/sched_nr_migrate
+echo RT_RUNTIME_GREED | sudo tee /sys/kernel/debug/sched_features
+echo NO_RT_RUNTIME_SHARE | sudo tee /sys/kernel/debug/sched_features
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 sudo bash -c "time sudo chrt -f 99 qemu-system-x86_64 \
@@ -186,7 +189,7 @@ sudo bash -c "time sudo chrt -f 99 qemu-system-x86_64 \
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
-picom -b
+#picom -b
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
