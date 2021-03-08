@@ -87,7 +87,7 @@ if [ "$SHIELD" == "true" ]; then
     echo 0 | sudo tee /sys/kernel/mm/ksm/run
     echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
     echo 0 | sudo tee /proc/sys/kernel/numa_balancing
-    sudo sysctl vm.stat_interval=120
+    #sudo sysctl vm.stat_interval=120
     echo "==> bringing cpus offline..."
     echo 0 | sudo tee /sys/devices/system/cpu/cpu1/online
     echo 0 | sudo tee /sys/devices/system/cpu/cpu2/online
@@ -130,11 +130,6 @@ if [ "$SHIELD" == "true" ]; then
     sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
-#echo "==> changing audio priority..." # remove this if there are errors or you are not using pipewire
-#sudo chrt -p -a --rr 20 $(pidof pipewire-media-session)
-#sudo chrt -p -a --rr 20 $(pidof pipewire)
-#sudo chrt -p -a --rr 20 $(pidof pipewire-pulse)
-#sudo chrt -p -a -rr 19 $(pidof python3)
 echo "==> starting scream in 60 seconds (20ms)..."
 bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 # https://bitsum.com/tools/cpu-affinity-calculator/
