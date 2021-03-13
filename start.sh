@@ -82,28 +82,11 @@ sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important f
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on configured cpus..."
     sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
-    sudo tuna --cpus=2-7 --isolate
-    sudo tuna --cpus=10-15 --isolate
     sudo find /sys/devices/virtual/workqueue -name cpumask  -exec sh -c 'echo 1 > {}' ';'
     echo 0 | sudo tee /sys/kernel/mm/ksm/run
     echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
     echo 0 | sudo tee /proc/sys/kernel/numa_balancing
     #sudo sysctl vm.stat_interval=120
-    echo "==> bringing cpus offline..."
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu1/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu2/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu3/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu4/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu5/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu6/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu7/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu10/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu11/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu12/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu13/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online
-    echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online
-    sleep 5
     echo 1 | sudo tee /sys/devices/system/cpu/cpu*/online
     sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
     sudo tuna --cpus=2-7 --isolate
