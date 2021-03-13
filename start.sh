@@ -1,3 +1,4 @@
+#!/bin/bash
 cd /tools/vm/
 RAM=8G # RAM dedicated for VM
 HOST_CPUS=16 # CPUS on host
