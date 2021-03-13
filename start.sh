@@ -104,21 +104,7 @@ if [ "$SHIELD" == "true" ]; then
     echo 0 | sudo tee /sys/devices/system/cpu/cpu14/online
     echo 0 | sudo tee /sys/devices/system/cpu/cpu15/online
     sleep 5
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu1/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu2/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu3/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu4/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu5/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu6/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu7/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu8/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu9/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu10/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu11/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu12/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu13/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu14/online
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu15/online
+    echo 1 | sudo tee /sys/devices/system/cpu/cpu*/online
     sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
     sudo tuna --cpus=2-7 --isolate
     sudo tuna --cpus=10-15 --isolate
