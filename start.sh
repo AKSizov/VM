@@ -81,17 +81,8 @@ echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on configured cpus..."
-    sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
-    sudo find /sys/devices/virtual/workqueue -name cpumask  -exec sh -c 'echo 1 > {}' ';'
-    echo 0 | sudo tee /sys/kernel/mm/ksm/run
-    echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
-    echo 0 | sudo tee /proc/sys/kernel/numa_balancing
-    #sudo sysctl vm.stat_interval=120
-    echo 1 | sudo tee /sys/devices/system/cpu/cpu*/online
-    sudo bash -c "IRQBALANCE_BANNED_CPUS=fcfc irqbalance --foreground --oneshot"
     sudo tuna --cpus=2-7 --isolate
     sudo tuna --cpus=10-15 --isolate
-    sudo find /sys/devices/virtual/workqueue -name cpumask  -exec sh -c 'echo 1 > {}' ';'
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
