@@ -121,7 +121,7 @@ sudo bash -c "time sudo qemu-system-x86_64 \
 	--enable-kvm `# so we can actually get some speed`\
 	-mem-prealloc `# prealloc memory`\
 	-vga none `# using ramfb below`\
-	`#-device ramfb ``# primitive display`\
+	-device ramfb `# primitive display`\
 	--display none `# display ramfb contents`\
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
