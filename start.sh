@@ -88,7 +88,7 @@ if [ "$SHIELD" == "true" ]; then
     # for intel CPUs with hyperthreading, the threads are not next to each other
     # on a 16 cpu machine, cores 1 and 8 are on the same CPU and should be passed through to the guest as such
     # configure the CPU pinning here, configure the exposed guest topology in the qemu command
-    sudo cset shield --shield --kthread=on --cpu 2-7,10-15
+    #sudo cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
 echo "==> starting scream in 60 seconds (20ms)..."
