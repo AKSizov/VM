@@ -98,7 +98,7 @@ bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use i
 # 303 = CPUs 0,1,8,9
 sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
 #echo "==> shutting down picom..."
-#pkill picom # <= this little shit was the cause of all of my problems.
+#pkill picom # whenever the host does something with intel graphics, the guest lags. why? please tell me.
 # keep this here if you experience lag in the guest when doing literally anything in the host
 #echo "==> setting cpu freq..."
 #sudo ./freq-max.sh
