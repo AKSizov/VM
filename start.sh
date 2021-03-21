@@ -96,7 +96,7 @@ echo "==> starting scream in 60 seconds (20ms)..."
 bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
-sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
+#sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
 #echo "==> shutting down picom..."
 #pkill picom # whenever the host does something with intel graphics, the guest lags. why? please tell me.
 # keep this here if you experience lag in the guest when doing literally anything in the host
