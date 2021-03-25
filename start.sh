@@ -81,6 +81,7 @@ echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on configured cpus..."
+    echo 1 | sudo tee /proc/irq/*/smp_affinity
     sudo tuna --cpus=2-7 --isolate
     sudo tuna --cpus=10-15 --isolate
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
