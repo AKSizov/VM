@@ -94,7 +94,7 @@ if [ "$SHIELD" == "true" ]; then
 fi
 sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
 echo "==> starting scream in 60 seconds (20ms)..."
-bash -c "sleep 60 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 #sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
