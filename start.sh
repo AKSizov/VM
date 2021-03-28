@@ -108,7 +108,7 @@ echo -1 | sudo tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95%
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
-sudo bash -c "time sudo qemu-system-x86_64 \
+sudo bash -c "time qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
