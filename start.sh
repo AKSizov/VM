@@ -140,6 +140,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
+	-overcommit cpu-pm=on `# overcommit cpu power management states for reduced latency`\
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 #-overcommit cpu-pm=on \
