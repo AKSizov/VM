@@ -82,8 +82,6 @@ sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important f
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on configured cpus..."
     echo 1 | sudo tee /proc/irq/*/smp_affinity
-    #sudo tuna --cpus=2-7 --isolate
-    #sudo tuna --cpus=10-15 --isolate
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
@@ -98,8 +96,6 @@ bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use i
 # 303 = CPUs 0,1,8,9
 #sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
 #echo "==> shutting down picom..."
-#pkill picom # whenever the host does something with intel graphics, the guest lags. why? please tell me.
-# keep this here if you experience lag in the guest when doing literally anything in the host
 #echo "==> setting cpu freq..."
 #sudo ./freq-max.sh
 echo "==> changing rt settings..."
@@ -143,8 +139,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-overcommit cpu-pm=on `# overcommit cpu power management states for reduced latency`\
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
-#-overcommit cpu-pm=on \
-#picom -b
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
