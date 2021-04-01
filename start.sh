@@ -106,7 +106,7 @@ echo "==> start the monstrosity..."
 SENT=$(cat /proc/cmdline); for word in $SENT; do echo $word | grep hugepages= | tr -d '\n' | tr -d 'hugepages=' > /tmp/hugepagenum ; done
 PAGESN=$(cat /tmp/hugepagenum)
 if (( PAGESN > 0 )); then
-	RAM=$PAGESN
+	RAM=${PAGESN}G
 fi
 sudo bash -c "time qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
