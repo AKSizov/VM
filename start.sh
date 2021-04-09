@@ -103,6 +103,7 @@ echo -1 | sudo tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95%
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
+xhost +
 SENT=$(cat /proc/cmdline); for word in $SENT; do echo $word | grep hugepages= | tr -d '\n' | tr -d 'hugepages=' > /tmp/hugepagenum ; done
 PAGESN=$(cat /tmp/hugepagenum)
 if (( PAGESN > 0 )); then
@@ -141,7 +142,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
-	-overcommit cpu-pm=on `# overcommit cpu power management states for reduced latency`\
 	-S `# start qemu in paused state so we can pin the threads`\
 	| tee con.log" `# so we can see the CPU threads`
 if [ "$SHIELD" == "true" ]; then
