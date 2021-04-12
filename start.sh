@@ -142,7 +142,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
-	-S `# start qemu in paused state so we can pin the threads`\
+	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
