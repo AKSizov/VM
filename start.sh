@@ -109,13 +109,14 @@ PAGESN=$(cat /tmp/hugepagenum)
 if (( PAGESN > 0 )); then
 	RAM=${PAGESN}G
 fi
+sudo bash -c "sleep 3 && ./pin.sh" &
 sudo bash -c "time qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
 	-m $RAM `# amount of ram is variable depending on args`\
 	-mem-path /dev/hugepages `# hugepages increase ram performance`\
-	-cpu host,-vmx,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
+	-cpu host,-vmx,host-cache-info=on,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
