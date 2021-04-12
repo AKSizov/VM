@@ -12,6 +12,10 @@ CPU_T_8=$(cat con.log | grep "CPU #8:" | cut -c 21-)
 CPU_T_9=$(cat con.log | grep "CPU #9:" | cut -c 21-)
 CPU_T_10=$(cat con.log | grep "CPU #10:" | cut -c 22-)
 CPU_T_11=$(cat con.log | grep "CPU #11:" | cut -c 22-)
+if [ -z "$CPU_T_11" ]; then
+    echo "cpu thread 11 not found... exiting!"
+    exit 1
+fi
 #CPU_T_12=$(cat con.log | grep "CPU #12:" | cut -c 22-)
 #CPU_T_13=$(cat con.log | grep "CPU #13:" | cut -c 22-)
 #CPU_T_14=$(cat con.log | grep "CPU #14:" | cut -c 22-)
@@ -50,18 +54,18 @@ echo "  -> CPU thread 11 is $CPU_T_11"
 #echo "  -> CPU thread 14 is $CPU_T_14"
 #echo "  -> CPU thread 15 is $CPU_T_15"
 echo "==> shielding processes..."
-sudo cset shield -s -p $CPU_T_0
-sudo cset shield -s -p $CPU_T_1
-sudo cset shield -s -p $CPU_T_2
-sudo cset shield -s -p $CPU_T_3
-sudo cset shield -s -p $CPU_T_4
-sudo cset shield -s -p $CPU_T_5
-sudo cset shield -s -p $CPU_T_6
-sudo cset shield -s -p $CPU_T_7
-sudo cset shield -s -p $CPU_T_8
-sudo cset shield -s -p $CPU_T_9
-sudo cset shield -s -p $CPU_T_10
-sudo cset shield -s -p $CPU_T_11
+sudo cset shield --force -s -p $CPU_T_0
+sudo cset shield --force -s -p $CPU_T_1
+sudo cset shield --force -s -p $CPU_T_2
+sudo cset shield --force -s -p $CPU_T_3
+sudo cset shield --force -s -p $CPU_T_4
+sudo cset shield --force -s -p $CPU_T_5
+sudo cset shield --force -s -p $CPU_T_6
+sudo cset shield --force -s -p $CPU_T_7
+sudo cset shield --force -s -p $CPU_T_8
+sudo cset shield --force -s -p $CPU_T_9
+sudo cset shield --force -s -p $CPU_T_10
+sudo cset shield --force -s -p $CPU_T_11
 echo "==> setting cpu affinities..."
 sudo taskset -cp 2 $CPU_T_0
 sudo taskset -cp 10 $CPU_T_1
@@ -79,17 +83,23 @@ sudo taskset -cp 15 $CPU_T_11
 #taskset -cp 14 $CPU_T_13
 #taskset -cp 7 $CPU_T_14
 #taskset -cp 15 $CPU_T_15
-echo "==> changing priorities..."
-sudo chrt -p -r 99 $CPU_T_0
-sudo chrt -p -r 99 $CPU_T_1
-sudo chrt -p -r 99 $CPU_T_2
-sudo chrt -p -r 99 $CPU_T_3
-sudo chrt -p -r 99 $CPU_T_4
-sudo chrt -p -r 99 $CPU_T_5
-sudo chrt -p -r 99 $CPU_T_6
-sudo chrt -p -r 99 $CPU_T_7
-sudo chrt -p -r 99 $CPU_T_8
-sudo chrt -p -r 99 $CPU_T_9
-sudo chrt -p -r 99 $CPU_T_10
-sudo chrt -p -r 99 $CPU_T_11
+#echo "==> changing priorities..."
+# from https://rigtorp.se/low-latency-guide/
+# For lowest latency applications I avoid using real-time priorities SCHED_FIFO / SCHED_RR. Instead it’s better to run a single thread in SCHED_OTHER per core and using busy waiting / polling in order to never enter kernel mode. If you do so with real-time priority you can prevent the kernel from running tasks such as vmstat leading to kernel lockup issues.
+# To prevent accidental lockups the kernel comes with a feature that by default throttles real-time tasks to use at most 95% of the CPU bandwidth. If you are using real-time tasks you might want to adjust the real-time throttling configuration.
+# “Real Time Throttling”. https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
+# “Real-Time group scheduling”. https://www.kernel.org/doc/html/latest/scheduler/sched-rt-group.html
+RT_PRI=10
+sudo chrt -p -f $RT_PRI $CPU_T_0
+sudo chrt -p -f $RT_PRI $CPU_T_1
+sudo chrt -p -f $RT_PRI $CPU_T_2
+sudo chrt -p -f $RT_PRI $CPU_T_3
+sudo chrt -p -f $RT_PRI $CPU_T_4
+sudo chrt -p -f $RT_PRI $CPU_T_5
+sudo chrt -p -f $RT_PRI $CPU_T_6
+sudo chrt -p -f $RT_PRI $CPU_T_7
+sudo chrt -p -f $RT_PRI $CPU_T_8
+sudo chrt -p -f $RT_PRI $CPU_T_9
+sudo chrt -p -f $RT_PRI $CPU_T_10
+sudo chrt -p -f $RT_PRI $CPU_T_11
 echo "==> done!"

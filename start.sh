@@ -144,6 +144,8 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
 	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
+echo "==> removing cpu threads file"
+rm -f con.log
 if [ "$SHIELD" == "true" ]; then
   echo "==> resetting the cpu shield..."
   sudo cset shield --reset
