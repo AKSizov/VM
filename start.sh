@@ -122,8 +122,8 @@ sudo bash -c "time qemu-system-x86_64 \
 	--enable-kvm `# so we can actually get some speed`\
 	-mem-prealloc `# prealloc memory`\
 	-vga none `# using ramfb below`\
-	-device ramfb `# primitive display`\
-	--display gtk `# display ramfb contents`\
+	`#-device ramfb` `# primitive display`\
+	--display none `# display ramfb contents`\
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
 	-monitor stdio `# so we can have a monitor`\
 	-boot d `# boot from disk first`\
@@ -158,6 +158,7 @@ pkill scream
 #sudo ./freq-min.sh
 echo "==> shutdown complete!"
 
+#-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.rom `# my GPU`\
 ### random stuff i felt like i should leave just in case ###
 
 #-device ramfb
