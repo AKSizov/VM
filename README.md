@@ -28,4 +28,4 @@ Undetectable VM: [https://www.reddit.com/r/VFIO/comments/i071qx/spoof_and_make_y
 Prevent VM exits through RDTSC: [https://github.com/WCharacter/RDTSC-KVM-Handler](https://github.com/WCharacter/RDTSC-KVM-Handler)
 
 ## Footnote
-I am working on a different RDTSC patch, that hopefully doesn't cause a VM exit every time the TSC is read. (2020-05-02)
+I have made a patch that hides vm exits through TSC offset, will publish soon. (2020-05-09)
