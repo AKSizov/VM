@@ -116,7 +116,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-pflash OVMF-Custom.fd `# UEFI image`\
 	-m $RAM `# amount of ram is variable depending on args`\
 	-mem-path /dev/hugepages `# hugepages increase ram performance`\
-	-cpu host,-vmx,host-cache-info=on,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
+	-cpu host,-vmx,host-cache-info=on,-kvm-poll-control,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
@@ -134,6 +134,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.rom `# my GPU`\
 	-device vfio-pci,host=3d:00.0 `# my NVME`\
 	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on `# keyboard passthrough via evdev`\
+	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
 	-device virtio-keyboard-pci,id=input1,bus=pcie.0 `# virtio device`\
 	-device ich9-intel-hda,bus=pcie.0,addr=0x1b `# audio input/output`\
 	-device hda-micro,audiodev=hda `# audio things`\
@@ -141,7 +142,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
-	-device usb-host,hostbus=1,hostport=2 \
 	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
 echo "==> removing cpu threads file"
@@ -156,9 +156,9 @@ sudo systemctl stop libvirtd
 pkill scream
 #sudo ./freq-min.sh
 echo "==> shutdown complete!"
-#-device virtio-mouse-pci,id=input0,bus=pcie.0 `# virtio device`\
-#-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
-#-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.rom `# my GPU`\
+#-device virtio-mouse-pci,id=input0,bus=pcie.0
+#-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse
+#-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.ro
 ### random stuff i felt like i should leave just in case ###
 
 #-device ramfb
