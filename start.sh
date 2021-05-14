@@ -135,7 +135,9 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device vfio-pci,host=3d:00.0 `# my NVME`\
 	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on `# keyboard passthrough via evdev`\
 	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
+	-object input-linux,id=mouse2,evdev=/dev/input/event10 \
 	-device virtio-keyboard-pci,id=input1,bus=pcie.0 `# virtio device`\
+	-device virtio-mouse-pci,id=input0,bus=pcie.0 `# virtio mouse` \
 	-device ich9-intel-hda,bus=pcie.0,addr=0x1b `# audio input/output`\
 	-device hda-micro,audiodev=hda `# audio things`\
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
