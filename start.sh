@@ -116,7 +116,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-pflash OVMF-Custom.fd `# UEFI image`\
 	-m $RAM `# amount of ram is variable depending on args`\
 	-mem-path /dev/hugepages `# hugepages increase ram performance`\
-	-cpu host,-vmx,host-cache-info=on,-kvm-poll-control,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
+	-cpu host,+invtsc,-vmx,host-cache-info=on,-kvm-poll-control,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
@@ -142,6 +142,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device hda-micro,audiodev=hda `# audio things`\
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
+	-no-hpet `# trying to force TSC as clock source, much faster than hpet or ACPI PM timer` \
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
 	<<< 'info cpus'\
