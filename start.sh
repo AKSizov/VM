@@ -40,7 +40,7 @@ if [ $# -eq 3 ]; then
 fi
 VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough
 # hyper-v enhancements ^
-INVIS_FLAGS=rdtscp=off,kvm=off,hv_vendor_id=null,-hypervisor
+INVIS_FLAGS=kvm=off,hv_vendor_id=null,-hypervisor
 # invisible vm settings ^
 HYPERV=$INVIS_FLAGS # change default to whatever you'd like
 if [ $# -eq 4 ]; then
@@ -142,7 +142,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device hda-micro,audiodev=hda `# audio things`\
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
-	-no-hpet `# trying to force TSC as clock source, much faster than hpet or ACPI PM timer` \
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
 	<<< 'info cpus'\
@@ -159,6 +158,7 @@ sudo systemctl stop libvirtd
 pkill scream
 #sudo ./freq-min.sh
 echo "==> shutdown complete!"
+#-no-hpet `# trying to force TSC as clock source, much faster than hpet or ACPI PM timer` \
 #-device virtio-mouse-pci,id=input0,bus=pcie.0
 #-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse
 #-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.ro
