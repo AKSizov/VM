@@ -110,6 +110,7 @@ if (( PAGESN > 0 )); then
 	RAM=${PAGESN}G
 fi
 sudo bash -c "sleep 3 && ./pin.sh" &
+export PIPEWIRE_RUNTIME_DIR="/run/user/$UID"
 sudo bash -c "time qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
