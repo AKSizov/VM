@@ -143,7 +143,9 @@ sudo bash -c "time qemu-system-x86_64 \
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
+	-overcommit cpu-pm \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
+	-device usb-host,hostbus=1,hostport=1 `# misc usb passthrough`\
 	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
 echo "==> removing cpu threads file"
