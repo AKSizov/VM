@@ -117,7 +117,7 @@ sudo bash -c "time qemu-system-x86_64 \
 	-pflash OVMF-Custom.fd `# UEFI image`\
 	-m $RAM `# amount of ram is variable depending on args`\
 	-mem-path /dev/hugepages `# hugepages increase ram performance`\
-	-cpu host,+invtsc,-vmx,host-cache-info=on,-kvm-poll-control,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
+	-cpu max,+invtsc,-vmx,-kvm-poll-control,${HYPERV} `# -cpu host mimics host cpu, -vmx disables virtualization, other flags in variable`\
 	-rtc base=localtime,clock=host,driftfix=none `# windows needs localtime rtc`\
 	-smp ${CPUS},sockets=1,cores=${z_CORES},threads=2 `# CPU topology`\
 	--enable-kvm `# so we can actually get some speed`\
@@ -136,7 +136,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device vfio-pci,host=3d:00.0 `# my NVME`\
 	-object input-linux,id=kbd1,evdev=/dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd,grab_all=on,repeat=on `# keyboard passthrough via evdev`\
 	-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse `# mouse passthrough via evdev`\
-	-object input-linux,id=mouse2,evdev=/dev/input/event10 \
 	-device virtio-keyboard-pci,id=input1,bus=pcie.0 `# virtio device`\
 	-device virtio-mouse-pci,id=input0,bus=pcie.0 `# virtio mouse` \
 	-device ich9-intel-hda,bus=pcie.0,addr=0x1b `# audio input/output`\
@@ -145,7 +144,6 @@ sudo bash -c "time qemu-system-x86_64 \
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
-	-device usb-host,hostbus=1,hostport=1 `# misc usb passthrough`\
 	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
 echo "==> removing cpu threads file"
