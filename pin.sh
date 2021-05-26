@@ -89,7 +89,7 @@ sudo taskset -cp 15 $CPU_T_11
 # To prevent accidental lockups the kernel comes with a feature that by default throttles real-time tasks to use at most 95% of the CPU bandwidth. If you are using real-time tasks you might want to adjust the real-time throttling configuration.
 # “Real Time Throttling”. https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
 # “Real-Time group scheduling”. https://www.kernel.org/doc/html/latest/scheduler/sched-rt-group.html
-RT_PRI=10
+RT_PRI=20
 sudo chrt -p -f $RT_PRI $CPU_T_0
 sudo chrt -p -f $RT_PRI $CPU_T_1
 sudo chrt -p -f $RT_PRI $CPU_T_2
