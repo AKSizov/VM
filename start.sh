@@ -162,8 +162,6 @@ echo "==> shutdown complete!"
 #-device virtio-mouse-pci,id=input0,bus=pcie.0
 #-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-SINOWEALTH_Game_Mouse-event-mouse
 #-device vfio-pci,host=01:00.0,multifunction=on,romfile=gpu.ro
-### random stuff i felt like i should leave just in case ###
-
 #-device ramfb
 #-cpu host,rdtscp=off,kvm=off,${HYPERV} \
 #-no-hpet \
