@@ -142,8 +142,14 @@ sudo bash -c "time qemu-system-x86_64 \
 	-device hda-micro,audiodev=hda `# audio things`\
 	-audiodev pa,id=hda,out.frequency=48000,server=unix:/run/user/1000/pulse/native `# more audio things`\
 	-net bridge,br=virbr0 -net nic,model=virtio `# network through libvirtd`\
+	-drive if=none,id=stick,file=stick.img `# next 2 lines for bitlocker`\
+	-device nec-usb-xhci,id=xhci \
+	-device qemu-xhci,id=cam \
+	-device usb-storage,bus=xhci.0,drive=stick \
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
+	-device usb-host,hostbus=1,hostport=1 `#  `\
+	-device usb-host,bus=cam.0,hostbus=1,hostport=7 \
 	<<< 'info cpus'\
 	| tee con.log" `# so we can see the CPU threads`
 echo "==> removing cpu threads file"
