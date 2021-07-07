@@ -93,7 +93,7 @@ echo 1 | sudo tee /proc/irq/*/smp_affinity
 bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
 echo "==> starting scream in 60 seconds (20ms)..."
 #sudo bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
-sleep 10 && PULSE_SERVER=/run/user/1000/pulse/native PULSE_COOKIE=/home/z/.config/pulse/cookie scream -i virbr0 -t 20 &
+sleep 10 && PULSE_SERVER=/run/user/1000/pulse/native PULSE_COOKIE=/home/z/.config/pulse/cookie scream -i virbr0 -t 20 & # pulseaudio env because we are root.
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 #sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
@@ -111,8 +111,8 @@ PAGESN=$(cat /tmp/hugepagenum)
 if (( PAGESN > 0 )); then
 	RAM=${PAGESN}G
 fi
-bash -c "sleep 3 && ./pin.sh" &
-bash -c "time qemu-system-x86_64 \
+#bash -c "sleep 3 && ./pin.sh" &
+bash -c "qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
@@ -127,7 +127,7 @@ bash -c "time qemu-system-x86_64 \
 	`#-device ramfb` `# primitive display`\
 	--display none `# display ramfb contents`\
 	-nodefaults `# don't create CD-ROM, or other "default" devices`\
-	-monitor stdio `# so we can have a monitor`\
+	-monitor unix:/tmp/qemu.sock,server,nowait `# qemu socket for getting cpu threads and other controls`\
 	-boot d `# boot from disk first`\
 	-machine type=V_V,kernel_irqchip=on,accel=kvm,smm=off `# using patched QEMU instead of "q35", irqchip for interrupts, smm=off doesn't exit when some cpu call happens`\
 	-device ivshmem-plain,memdev=ivshmem,bus=pcie.0 `# used for memory device`\
@@ -150,9 +150,10 @@ bash -c "time qemu-system-x86_64 \
 	-usb \
 	-device usb-host,hostbus=1,hostport=4 `# passthrough AW lights, not applicable to most people`\
 	-device usb-host,hostbus=1,hostport=1 `#  `\
-	-device usb-host,bus=cam.0,hostbus=1,hostport=7 \
-	<<< 'info cpus'\
-	| tee con.log" `# so we can see the CPU threads`
+	-device usb-host,bus=cam.0,hostbus=1,hostport=7" &
+sleep 3 # give QEMU time to spin
+echo "info cpus" | socat - unix-connect:/tmp/qemu.sock > con.log && ./pin.sh
+socat -,echo=0,icanon=0 unix-connect:/tmp/qemu.sock
 echo "==> removing cpu threads file"
 rm -f con.log
 if [ "$SHIELD" == "true" ]; then
