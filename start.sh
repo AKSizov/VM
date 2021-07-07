@@ -5,10 +5,9 @@ HOST_CPUS=16 # CPUS on host
 CPUS=12 # vCPUS for guest
 SHIELD=true # if we isolate these CPUS for the guest exclusively
 z_SHIELD_COMMAND="cset shield --exec bash -- -c" # default shielding
-if [[ $EUID -eq 0 ]]; then
-    echo "Do not run this with root!"
-    exit 1 # in order to work with pulseaudio, do not run this script as root
-    # it will as for sudo password when starting qemu
+if [[ $EUID -ne 0 ]]; then
+    echo "Run this with root!"
+    exit 1 # qemu and KVM require root access, audio is handled through scream with the right vars
 fi
 if [ $# -eq 0 ]; then
     echo "==> no arguments supplied! Starting with defaults..."
@@ -70,28 +69,31 @@ z_LAST_HOST_CPU=$((HOST_CPUS - 1)) # not being used right now, configure CPU pin
 z_CORES=$((CPUS / 2)) # ^
 echo "==> preparing..."
 echo "==> making looking glass..."
-sudo touch /dev/shm/looking-glass && sudo chown z:kvm /dev/shm/looking-glass && sudo chmod 660 /dev/shm/looking-glass # for looking-glass guest-host display. YOU MUST HAVE A DUMMY PLUG IF USING NVIDIA
+touch /dev/shm/looking-glass 
+#chown z:kvm /dev/shm/looking-glass
+chmod 777 /dev/shm/looking-glass # for looking-glass guest-host display. YOU MUST HAVE A DUMMY PLUG IF USING NVIDIA
 echo "==> starting libvirtd..."
-sudo systemctl start libvirtd # for network only, I'll remove the libvirt dependency in the future
+systemctl start libvirtd # for network only, I'll remove the libvirt dependency in the future
 echo "==> attaching nvme..."
-sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach unused nvme
-sudo bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
-sudo bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
+bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach unused nvme
+bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
+bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
 echo "==> copying pulse cookie for root..."
 sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
 if [ "$SHIELD" == "true" ]; then
     echo "==> setting cpushield on configured cpus..."
-    echo 1 | sudo tee /proc/irq/*/smp_affinity
     #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
     # configure CPU pinning manually!
     # for intel CPUs with hyperthreading, the threads are not next to each other
     # on a 16 cpu machine, cores 1 and 8 are on the same CPU and should be passed through to the guest as such
     # configure the CPU pinning here, configure the exposed guest topology in the qemu command
-    sudo cset shield --shield --kthread=on --cpu 2-7,10-15
+    cset shield --shield --kthread=on --cpu 2-7,10-15
 fi
-sudo bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
+echo 1 | sudo tee /proc/irq/*/smp_affinity
+bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
 echo "==> starting scream in 60 seconds (20ms)..."
-bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+#sudo bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use it if you can.
+sleep 10 && PULSE_SERVER=/run/user/1000/pulse/native PULSE_COOKIE=/home/z/.config/pulse/cookie scream -i virbr0 -t 20 &
 # https://bitsum.com/tools/cpu-affinity-calculator/
 # 303 = CPUs 0,1,8,9
 #sudo bash -c "echo 303 > /sys/bus/workqueue/devices/writeback/cpumask" # cpu bitmask
@@ -99,7 +101,7 @@ bash -c "sleep 10 && scream -i virbr0 -t 20" & # scream is superior audio, use i
 #echo "==> setting cpu freq..."
 #sudo ./freq-max.sh
 echo "==> changing rt settings..."
-echo -1 | sudo tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95% (realtime tasks are throttled to 95% to prevent system lock-ups)
+echo -1 | tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95% (realtime tasks are throttled to 95% to prevent system lock-ups)
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/real_time_throttling
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
@@ -109,9 +111,8 @@ PAGESN=$(cat /tmp/hugepagenum)
 if (( PAGESN > 0 )); then
 	RAM=${PAGESN}G
 fi
-sudo bash -c "sleep 3 && ./pin.sh" &
-export PIPEWIRE_RUNTIME_DIR="/run/user/$UID"
-sudo bash -c "time qemu-system-x86_64 \
+bash -c "sleep 3 && ./pin.sh" &
+bash -c "time qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
@@ -160,7 +161,7 @@ if [ "$SHIELD" == "true" ]; then
 fi
 echo "==> shutting down..."
 sudo rm -fv /dev/shm/looking-glass
-sudo systemctl stop libvirtd
+systemctl stop libvirtd
 pkill scream
 #sudo ./freq-min.sh
 echo "==> shutdown complete!"
