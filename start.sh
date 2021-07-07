@@ -1,72 +1,13 @@
 #!/bin/bash
 cd /tools/vm/
 RAM=8G # RAM dedicated for VM
-HOST_CPUS=16 # CPUS on host
 CPUS=12 # vCPUS for guest
-SHIELD=true # if we isolate these CPUS for the guest exclusively
-z_SHIELD_COMMAND="cset shield --exec bash -- -c" # default shielding
 if [[ $EUID -ne 0 ]]; then
     echo "Run this with root!"
     exit 1 # qemu and KVM require root access, audio is handled through scream with the right vars
 fi
-if [ $# -eq 0 ]; then
-    echo "==> no arguments supplied! Starting with defaults..."
-fi
-if [ $# -eq 1 ]; then
-    echo "==> using $1 of ram..."
-    RAM=$1
-fi
-if [ $# -eq 2 ]; then
-    echo "==> using $1 of ram..."
-    echo "==> using $2 cpus..."
-    RAM=$1
-    CPUS=$2
-fi
-if [ $# -eq 3 ]; then
-    echo "==> using $1 of ram..."
-    echo "==> using $2 cpus..."
-    RAM=$1
-    CPUS=$2
-    if [ "$3" == "false" ]; then
-        echo "==> NOT using shielding..."
-	SHIELD=false
-	z_SHIELD_COMMAND="bash -c"
-    else
-        echo "==> using shielding..."
-	SHIELD=true
-	z_SHIELD_COMMAND="cset shield --exec bash -- -c"
-    fi
-fi
-VIS_FLAGS=hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=NV43FIX,hv-passthrough
-# hyper-v enhancements ^
 INVIS_FLAGS=kvm=off,hv_vendor_id=null,-hypervisor
-# invisible vm settings ^
-HYPERV=$INVIS_FLAGS # change default to whatever you'd like
-if [ $# -eq 4 ]; then
-    echo "==> using $1 of ram..."
-    echo "==> using $2 cpus..."
-    RAM=$1
-    CPUS=$2
-    if [ "$3" == "false" ]; then
-        echo "==> NOT using shielding..."
-        SHIELD=false
-        z_SHIELD_COMMAND="bash -c"
-    else
-        echo "==> using shielding..."
-        SHIELD=true
-        z_SHIELD_COMMAND="cset shield --exec bash -- -c"
-    fi
-    if [ "$4" == "false" ]; then
-        echo "==> NOT using hyper-v flags..."
-        HYPERV=$INVIS_FLAGS
-    else
-        echo "==> using hyper-v flags..."
-        HYPERV=$VIS_FLAGS
-    fi
-fi
-z_FIRST_HOST_CPU=$((16 - CPUS)) # see line below
-z_LAST_HOST_CPU=$((HOST_CPUS - 1)) # not being used right now, configure CPU pinning manually below
-z_CORES=$((CPUS / 2)) # ^
+HYPERV=$INVIS_FLAGS
 echo "==> preparing..."
 echo "==> making looking glass..."
 touch /dev/shm/looking-glass 
@@ -79,16 +20,6 @@ bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/nvme/unbind" # detach unuse
 bash -c "echo vfio-pci > /sys/bus/pci/devices/0000\:3d\:00.0/driver_override" # bind to virtio
 bash -c "echo -n 0000:3d:00.0 > /sys/bus/pci/drivers/vfio-pci/bind" # bind to virtio
 echo "==> copying pulse cookie for root..."
-sudo cp -v /home/z/.config/pulse/cookie /root/.config/pulse/cookie # important for pulseaudio
-if [ "$SHIELD" == "true" ]; then
-    echo "==> setting cpushield on configured cpus..."
-    #sudo cset shield --shield --kthread=on --cpu ${z_FIRST_HOST_CPU}-${z_LAST_HOST_CPU}
-    # configure CPU pinning manually!
-    # for intel CPUs with hyperthreading, the threads are not next to each other
-    # on a 16 cpu machine, cores 1 and 8 are on the same CPU and should be passed through to the guest as such
-    # configure the CPU pinning here, configure the exposed guest topology in the qemu command
-    cset shield --shield --kthread=on --cpu 2-7,10-15
-fi
 echo 1 | sudo tee /proc/irq/*/smp_affinity
 bash -c "echo -n vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override" # passthrough nvidia gpu, change 0000:01:00.0 to whatever lspci -v says your GPU sits on
 echo "==> starting scream in 60 seconds (20ms)..."
@@ -106,13 +37,7 @@ echo -1 | tee /proc/sys/kernel/sched_rt_runtime_us # don't limit cpu to 95% (rea
 echo "==> start the monstrosity..."
 # sudo $z_SHIELD_COMMAND
 xhost +
-SENT=$(cat /proc/cmdline); for word in $SENT; do echo $word | grep hugepages= | tr -d '\n' | tr -d 'hugepages=' > /tmp/hugepagenum ; done
-PAGESN=$(cat /tmp/hugepagenum)
-if (( PAGESN > 0 )); then
-	RAM=${PAGESN}G
-fi
-#bash -c "sleep 3 && ./pin.sh" &
-bash -c "qemu-system-x86_64 \
+nice -n -18 bash -c "qemu-system-x86_64 \
 	-name win10,debug-threads=on `# if we need to take the treads from somewhere else`\
 	-pidfile /run/qemu_ex.pid \
 	-pflash OVMF-Custom.fd `# UEFI image`\
