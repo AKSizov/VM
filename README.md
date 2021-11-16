@@ -1,3 +1,8 @@
+# ABANDONED (READ BELOW)
+This whole project cost me sanity, blood, and life.
+I'm not doing this again. Go buy 2 computers and use parsec instead.
+I promise, it's not worth going down this dark, dark path.
+
 # GPU Passthrough Windows 10 Setup
 A handful of scripts that use qemu without libvirt to make a working Windows machine with GPU passthrough.
 This is my GPU accelerated windows 10 VM machine setup that I use for gaming.
